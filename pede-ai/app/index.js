@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
 
 // Simulação de um banco de dados
 const cardapio = [
@@ -29,9 +30,22 @@ const cardapio = [
 ];
 
 export default function Home() {
-  return (
+  const [carrinho, setCarrinho] = useState([]);
+
+  const adicionarAoCarrinho = (item) => {
+    setCarrinho([...carrinho, item]);   // Pega todos os itens que já estão no carrinho e adiciona o novo item no final
+    
+    // Pop-up de confirmação
+    Alert.alert('Sucesso!', `${item.nome} foi adicionado ao seu pedido.`);
+  };
+
+    return (
     <ScrollView style={styles.container}>
-      <Text style={styles.titulo}>Cardápio</Text>
+      <View style={styles.header}>
+        <Text style={styles.titulo}>Cardápio</Text>
+        {/* Mostrador visual para provar que o estado está funcionando */}
+        <Text style={styles.contador}>🛒 {carrinho.length} itens</Text>
+      </View>
       
       {cardapio.map((item) => (
         <View key={item.id} style={styles.card}>
@@ -53,6 +67,7 @@ export default function Home() {
             <TouchableOpacity 
               style={[styles.botao, !item.disponivel && styles.botaoDesativado]}
               disabled={!item.disponivel}
+              onPress={() => adicionarAoCarrinho(item)}
             >
               <Text style={styles.textoBotao}>Adicionar</Text>
             </TouchableOpacity>
@@ -70,11 +85,25 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 50,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   titulo: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: '#3d13f6',
+  },
+  contador: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#08011e',
+    backgroundColor: '#e0deff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   card: {
     flexDirection: 'row',
