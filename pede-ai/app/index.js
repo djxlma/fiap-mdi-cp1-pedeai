@@ -1,5 +1,6 @@
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useState } from 'react';
+import { useRouter } from 'expo-router';
 
 // Simulação de um banco de dados
 const cardapio = [
@@ -31,19 +32,18 @@ const cardapio = [
 
 export default function Home() {
   const [carrinho, setCarrinho] = useState([]);
+  const router = useRouter();
 
   const adicionarAoCarrinho = (item) => {
-    setCarrinho([...carrinho, item]);   // Pega todos os itens que já estão no carrinho e adiciona o novo item no final
-    
-    // Pop-up de confirmação
+    setCarrinho([...carrinho, item]);
+
     Alert.alert('Sucesso!', `${item.nome} foi adicionado ao seu pedido.`);
   };
 
-    return (
+  return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.titulo}>Cardápio</Text>
-        {/* Mostrador visual para provar que o estado está funcionando */}
         <Text style={styles.contador}>🛒 {carrinho.length} itens</Text>
       </View>
       
@@ -58,8 +58,10 @@ export default function Home() {
             <View style={styles.rodapeCard}>
               <Text style={styles.preco}>R$ {item.preco.toFixed(2)}</Text>
               
-              {/* Lógica para mudar a cor de acordo com a disponibilidade do item */}
-              <Text style={[styles.status, item.disponivel ? styles.statusDisponivel : styles.statusEsgotado]}>
+              <Text style={[
+                styles.status,
+                item.disponivel ? styles.statusDisponivel : styles.statusEsgotado
+              ]}>
                 {item.disponivel ? 'Disponível' : 'Esgotado'}
               </Text>
             </View>
@@ -74,6 +76,21 @@ export default function Home() {
           </View>
         </View>
       ))}
+
+      {/* BOTÃO PARA IR AO CARRINHO */}
+      <TouchableOpacity
+        style={styles.botaoCarrinho}
+        onPress={() =>
+          router.push({
+            pathname: '/cart',
+            params: { cart: JSON.stringify(carrinho) },
+          })
+        }
+      >
+        <Text style={{ color: '#fff', fontWeight: 'bold' }}>
+          Ir para Carrinho
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -111,9 +128,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 15,
     marginBottom: 15,
-    shadowColor: '#08011e',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
     elevation: 3,
   },
   imagem: {
@@ -124,7 +138,6 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     flex: 1,
-    justifyContent: 'space-between',
   },
   nome: {
     fontSize: 18,
@@ -134,13 +147,11 @@ const styles = StyleSheet.create({
   descricao: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 8,
   },
   rodapeCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    marginTop: 5,
   },
   preco: {
     fontSize: 16,
@@ -162,6 +173,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 6,
     alignItems: 'center',
+    marginTop: 10,
   },
   botaoDesativado: {
     backgroundColor: '#ccc',
@@ -169,5 +181,12 @@ const styles = StyleSheet.create({
   textoBotao: {
     color: '#f6f5ff',
     fontWeight: 'bold',
-  }
+  },
+  botaoCarrinho: {
+    backgroundColor: '#3d13f6',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
 });
