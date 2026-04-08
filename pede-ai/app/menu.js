@@ -1,6 +1,9 @@
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import ProductCard from '../components/CardProduto';
+import CustomButton from '../components/BotaoCustomizado';
+import { colors, spacing, fontSize, radius } from '../theme';
 
 const cardapio = [
   {
@@ -26,7 +29,7 @@ const cardapio = [
     preco: 8,
     imagem: 'https://picsum.photos/seed/suco/100',
     disponivel: false,
-  }
+  },
 ];
 
 export default function Menu() {
@@ -38,60 +41,49 @@ export default function Menu() {
     Alert.alert('Adicionado!', item.nome);
   };
 
+  const itensDisponiveis = cardapio.filter((i) => i.disponivel);
+
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.titulo}>Cardápio</Text>
 
-      {cardapio.map((item) => (
-        <View key={item.id} style={styles.card}>
-          <Image source={{ uri: item.imagem }} style={styles.img} />
-
-          <View style={{ flex: 1 }}>
-            <Text style={styles.nome}>{item.nome}</Text>
-            <Text>{item.descricao}</Text>
-
-            <View style={styles.linha}>
-              <Text style={styles.preco}>R$ {item.preco.toFixed(2)}</Text>
-
-              <Text
-                style={[
-                  styles.status,
-                  item.disponivel ? styles.disponivel : styles.esgotado
-                ]}
-              >
-                {item.disponivel ? 'Disponível' : 'Esgotado'}
-              </Text>
-            </View>
-
-            <TouchableOpacity 
-              style={[
-                styles.botao,
-                !item.disponivel && styles.botaoDesativado
-              ]}
-              disabled={!item.disponivel}
-              onPress={() => adicionar(item)}
-            >
-              <Text style={styles.textoBotao}>
-                {item.disponivel ? 'Adicionar' : 'Indisponível'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+      {/* Estado vazio: nenhum item disponível no momento */}
+      {itensDisponiveis.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyIcon}>🍽️</Text>
+          <Text style={styles.emptyTitle}>Nenhum item disponível</Text>
+          <Text style={styles.emptySubtitle}>
+            A cantina ainda não atualizou o cardápio. Tente novamente em breve.
+          </Text>
         </View>
-      ))}
+      ) : (
+        // Exibe todos os itens (disponíveis primeiro, esgotados por último)
+        [...cardapio]
+          .sort((a, b) => (b.disponivel ? 1 : 0) - (a.disponivel ? 1 : 0))
+          .map((item) => (
+            <ProductCard key={item.id} item={item} onAdd={adicionar} />
+          ))
+      )}
 
-      <TouchableOpacity
-        style={styles.botaoCarrinho}
-        onPress={() =>
-          router.push({
-            pathname: '/cart',
-            params: { carrinho: JSON.stringify(carrinho) },
-          })
-        }
-      >
-        <Text style={styles.textoBotao}>
-          Ir para Carrinho ({carrinho.length})
-        </Text>
-      </TouchableOpacity>
+      {/* Botão do carrinho com badge de quantidade */}
+      <View style={styles.carrinhoWrapper}>
+
+        <CustomButton
+          label={
+            carrinho.length === 0
+              ? 'Carrinho vazio'
+              : `Ir para Carrinho (${carrinho.length})`
+          }
+          variant="secondary"
+          disabled={carrinho.length === 0}
+          onPress={() =>
+            router.push({
+              pathname: '/cart',
+              params: { carrinho: JSON.stringify(carrinho) },
+            })
+          }
+        />
+      </View>
     </ScrollView>
   );
 }
@@ -99,66 +91,58 @@ export default function Menu() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f6f5ff',
-    padding: 20
+    backgroundColor: colors.background,
+  },
+  content: {
+    padding: spacing.xl,
+    paddingBottom: spacing.xl * 2,
   },
   titulo: {
-    fontSize: 28,
-    color: '#3d13f6',
-    marginBottom: 20
+    fontSize: fontSize.xxl,
+    color: colors.primary,
+    fontWeight: 'bold',
+    marginBottom: spacing.xl,
   },
-  card: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 10
-  },
-  img: {
-    width: 80,
-    height: 80,
-    marginRight: 10
-  },
-  nome: {
-    fontWeight: 'bold'
-  },
-  linha: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  // Estado vazio
+  emptyState: {
     alignItems: 'center',
-    marginTop: 5
+    paddingVertical: spacing.xl * 2,
   },
-  preco: {
-    color: '#f769b2',
-    fontWeight: 'bold'
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: spacing.lg,
   },
-  status: {
-    fontSize: 12,
-    fontWeight: 'bold'
+  emptyTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: 'bold',
+    color: colors.dark,
+    marginBottom: spacing.sm,
   },
-  disponivel: {
-    color: '#6ad408'
+  emptySubtitle: {
+    fontSize: fontSize.md,
+    color: '#888',
+    textAlign: 'center',
   },
-  esgotado: {
-    color: '#d3d3d3'
+  // Badge de quantidade no botão do carrinho
+  carrinhoWrapper: {
+    position: 'relative',
+    marginTop: spacing.xl,
   },
-  botao: {
-    backgroundColor: '#3d13f6',
-    padding: 6,
-    marginTop: 8,
-    borderRadius: 5
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
-  botaoDesativado: {
-    backgroundColor: '#ccc'
+  badgeText: {
+    color: colors.white,
+    fontSize: fontSize.sm,
+    fontWeight: 'bold',
   },
-  botaoCarrinho: {
-    backgroundColor: '#f769b2',
-    padding: 15,
-    borderRadius: 10,
-    marginTop: 20
-  },
-  textoBotao: {
-    color: '#fff',
-    textAlign: 'center'
-  }
 });
