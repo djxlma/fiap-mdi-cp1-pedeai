@@ -3,30 +3,27 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 export default function Status() {
-  const params = useLocalSearchParams();
-
-  const pedido = params.pedido ? JSON.parse(params.pedido) : [];
-  const total = params.total || '0.00';
-  const horario = params.horario || '-';
-  const pagamento = params.pagamento || '-';
+  const { total, horario } = useLocalSearchParams();
 
   const [tempo, setTempo] = useState(20);
   const [status, setStatus] = useState('Pedido recebido');
 
+  // ⏱️ contador
   useEffect(() => {
-    const intervalo = setInterval(() => {
+    const interval = setInterval(() => {
       setTempo((prev) => {
         if (prev <= 1) {
-          clearInterval(intervalo);
+          clearInterval(interval);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(intervalo);
+    return () => clearInterval(interval);
   }, []);
 
+  // 🔄 mudança de status
   useEffect(() => {
     if (tempo > 15) {
       setStatus('Pedido recebido');
@@ -44,14 +41,7 @@ export default function Status() {
       <Text style={styles.titulo}>Status do Pedido</Text>
 
       <View style={styles.card}>
-        {pedido.map((item) => (
-          <Text key={item.id} style={styles.item}>
-            {item.nome} x{item.quantidade}
-          </Text>
-        ))}
-
         <Text style={styles.info}>Horário: {horario}</Text>
-        <Text style={styles.info}>Pagamento: {pagamento}</Text>
         <Text style={styles.info}>Total: R$ {Number(total).toFixed(2)}</Text>
 
         <Text style={styles.status}>Status: {status}</Text>
@@ -80,26 +70,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
   },
-  item: {
-    fontSize: 16,
-    marginBottom: 8,
-    color: '#08011e',
-  },
   info: {
     fontSize: 16,
-    marginTop: 8,
+    marginBottom: 10,
     color: '#08011e',
   },
   status: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 18,
+    marginTop: 15,
     color: '#f769b2',
   },
   tempo: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 8,
+    marginTop: 10,
     color: '#3d13f6',
   },
 });
