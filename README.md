@@ -48,12 +48,14 @@ O **PedeAí** é um aplicativo mobile desenvolvido com **React Native + Expo** q
 | Pedido Concluído |
 | --- |
 | ![Pedido Concluído](./pede-ai/assets/screenshots/pedidoConcluido.jpg) |
+<<<<<<< HEAD
 
 ---
 
 ## 🎥 Demonstração
 
 (https://www.youtube.com/shorts/afwWdeU9ymQ)
+
 
 ---
 
